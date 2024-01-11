@@ -23,7 +23,7 @@ namespace SimpleParser
                 var firstBreakIndex = contentHtml.IndexOf("<br><br>");
                 if (firstBreakIndex != -1)
                 {
-                    contentHtml = contentHtml.Substring(firstBreakIndex + 8); // +8 to remove the first "<br><br>"
+                    contentHtml = contentHtml[(firstBreakIndex + 8)..]; // +8 to remove the first "<br><br>"
                 }
 
                 postContent.InnerHtml = contentHtml;
