@@ -19,6 +19,15 @@ namespace SimpleParser
             var postContent = doc.DocumentNode.SelectSingleNode("//article[contains(@class, 'b-singlepost-body')]");
             if (postContent != null)
             {
+                var contentHtml = postContent.InnerHtml;
+                var firstBreakIndex = contentHtml.IndexOf("<br><br>");
+                if (firstBreakIndex != -1)
+                {
+                    contentHtml = contentHtml.Substring(firstBreakIndex + 8); // +8 to remove the first "<br><br>"
+                }
+
+                postContent.InnerHtml = contentHtml;
+
                 foreach (var link in postContent.SelectNodes(".//a[@href]"))
                 {
                     var href = link.GetAttributeValue("href", string.Empty);
