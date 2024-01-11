@@ -28,12 +28,11 @@ namespace SimpleParser
                 foreach (var link in postContent.SelectNodes(".//a[@href]"))
                 {
                     var href = link.GetAttributeValue("href", string.Empty);
-                    if (href.StartsWith("https://www.livejournal.com/away?to="))
-                    {
-                        href = href.Replace("https://www.livejournal.com/away?to=", "");
-                        href = HttpUtility.UrlDecode(href); // Normalize encoded characters
-                        link.SetAttributeValue("href", href);
-                    }
+                    if (!href.StartsWith("https://www.livejournal.com/away?to=")) 
+                        continue;
+                    href = href.Replace("https://www.livejournal.com/away?to=", "");
+                    href = HttpUtility.UrlDecode(href); // Normalize encoded characters
+                    link.SetAttributeValue("href", href);
                 }
 
                 Console.WriteLine(postContent.InnerHtml);
