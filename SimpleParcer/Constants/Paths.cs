@@ -1,7 +1,7 @@
 ﻿namespace SimpleParser.Constants
 {
-    public class Paths
+    internal class Paths
     {
-        public const string PostUri = @"https://chgk-spb.livejournal.com/2596838.html";
+        internal const string PostUri = @"https://chgk-spb.livejournal.com/2596838.html";
     }
 }
