@@ -1,11 +1,7 @@
 ﻿namespace SimpleParser.API
 {
-    internal class Announcement
+    internal class Announcement(string text)
     {
-        internal string Text { get; }
-        public Announcement()
-        {
-            
-        }
+        internal string Text { get; } = text;
     }
 }
