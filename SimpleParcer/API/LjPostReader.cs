@@ -28,9 +28,9 @@ namespace SimpleParser.API
                 foreach (var link in postContent.SelectNodes(".//a[@href]"))
                 {
                     var href = link.GetAttributeValue("href", string.Empty);
-                    if (!href.StartsWith("https://www.livejournal.com/away?to="))
+                    if (!href.StartsWith(ServiceLines.RemovableString))
                         continue;
-                    href = href.Replace("https://www.livejournal.com/away?to=", "");
+                    href = href.Replace(ServiceLines.RemovableString, "");
                     href = HttpUtility.UrlDecode(href); // Normalize encoded characters
                     link.SetAttributeValue("href", href);
                 }
