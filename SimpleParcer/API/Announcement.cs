@@ -2,6 +2,10 @@
 {
     internal class Announcement
     {
-
+        internal string Text { get; }
+        public Announcement()
+        {
+            
+        }
     }
 }
