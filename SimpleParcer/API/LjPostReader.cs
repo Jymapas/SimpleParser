@@ -6,7 +6,7 @@ namespace SimpleParser.API
 {
     internal class LjPostReader
     {
-        public async Task<string> GetAnnounce()
+        internal async Task<string> GetAnnounce()
         {
             var html = await new HttpClient().GetStringAsync(Paths.PostUri);
 
@@ -20,7 +20,7 @@ namespace SimpleParser.API
                 var firstBreakIndex = contentHtml.IndexOf("<br><br>");
                 if (firstBreakIndex != -1)
                 {
-                    contentHtml = contentHtml[(firstBreakIndex + 8)..]; // +8 to remove the first "<br><br>"
+                    contentHtml = contentHtml[(firstBreakIndex)..];
                 }
 
                 postContent.InnerHtml = contentHtml;
@@ -39,7 +39,7 @@ namespace SimpleParser.API
             }
             else
             {
-                return "Post content not found.";
+                return ServiceLines.ReceivingPostError;
             }
         }
     }
