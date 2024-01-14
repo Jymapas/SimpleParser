@@ -1,14 +1,15 @@
-﻿using HtmlAgilityPack;
+﻿using System.Runtime.Serialization;
+using HtmlAgilityPack;
 using System.Web;
+using SimpleParser.Constants;
 
 namespace SimpleParser
 {
     internal class Program
     {
-        const string url = "https://chgk-spb.livejournal.com/2596838.html";
-        static async Task Main(string[] args)
+        private async Task Main(string[] args)
         {
-            var html = await new HttpClient().GetStringAsync(url);
+            var html = await new HttpClient().GetStringAsync(Paths.PostUri);
 
             var doc = new HtmlDocument();
             doc.LoadHtml(html);
