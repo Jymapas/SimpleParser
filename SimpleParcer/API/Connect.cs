@@ -8,6 +8,7 @@ namespace SimpleParser.API
     internal class Connect
     {
         private string _botToken;
+        private MessagesHandler _messagesHandler = new();
 
         internal void Start()
         {
@@ -23,6 +24,13 @@ namespace SimpleParser.API
             {
                 AllowedUpdates = { }
             };
+
+            bot.StartReceiving(
+                _messagesHandler.HandleUpdateAsync,
+                _messagesHandler.HandleErrorAsync,
+                receiverOptions,
+                cancellationToken
+            );
         }
     }
 }
