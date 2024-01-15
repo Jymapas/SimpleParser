@@ -35,12 +35,14 @@ namespace SimpleParser.API
                     link.SetAttributeValue("href", href);
                 }
 
-                return postContent.InnerHtml;
+                return ReplaceBr(postContent.InnerHtml);
             }
             else
             {
                 return ServiceLines.ReceivingPostError;
             }
         }
+
+        private string ReplaceBr(string InnerHtml) => InnerHtml.Replace("<br>", "\n");
     }
 }
