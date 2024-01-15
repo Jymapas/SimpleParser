@@ -37,6 +37,11 @@ namespace SimpleParser.API
             return;
         }
 
+        public async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+        {
+            Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(exception));
+        }
+
         /// <summary>
         /// Отправка сообщений ботом
         /// </summary>
