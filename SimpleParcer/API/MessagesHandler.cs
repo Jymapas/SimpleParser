@@ -15,7 +15,10 @@ namespace SimpleParser.API
         {
             _botClient = botClient;
             _cancellationToken = cancellationToken;
-            if ((update.Type != UpdateType.Message) || (update.Message!.Type != MessageType.Text)) return;
+            if ((update.Type != UpdateType.Message) || (update.Message!.Type != MessageType.Text))
+            {
+                return;
+            }
             var message = update?.Message;
             var messageText = message.Text.Trim().ToLower();
             var chatId = message.Chat.Id;
@@ -28,13 +31,12 @@ namespace SimpleParser.API
 
             var reader = new LjPostReader();
             var announceSource = await reader.GetAnnounce();
-            
-            var announce = announceSource == ServiceLines.ReceivingPostError ?
-                announceSource :
-                ServiceLines.TgHead + announceSource;
+
+            var announce = announceSource == ServiceLines.ReceivingPostError
+                ? announceSource
+                : ServiceLines.TgHead + announceSource;
 
             await SendMessage(chatId, announce);
-            return;
         }
 
         public async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
