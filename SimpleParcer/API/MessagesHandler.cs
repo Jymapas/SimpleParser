@@ -19,11 +19,12 @@ namespace SimpleParser.API
                 return;
             }
             var message = update?.Message;
-            var messageText = message.Text.Trim().ToLower();
+            var messageText = message.Text.Trim();
             var chatId = message.Chat.Id;
 
-            if (!messageText.Equals(Commands.Announcement))
+            if (!messageText.Equals(Commands.Announcement, StringComparison.OrdinalIgnoreCase))
             {
+                Console.WriteLine(ServiceLines.UnknownCommand);
                 await SendMessage(chatId, ServiceLines.UnknownCommand);
                 return;
             }
