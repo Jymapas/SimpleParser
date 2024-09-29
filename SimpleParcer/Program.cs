@@ -1,21 +1,19 @@
 ﻿using SimpleParser.API;
+using SimpleParser.Helpers;
 
 namespace SimpleParser
 {
     internal class Program
     {
-        private static Task Main(string[] args)
+        static void Main(string[] args)
         {
-            if (!Helpers.FileExist.CheckExistence())
+            if (FileExist.CheckExistence())
             {
-                return Task.CompletedTask;
+                Connect connect = new();
+                connect.Start();
             }
-            
-            Connect connect = new();
-            connect.Start();
 
             Console.ReadLine();
-            return Task.CompletedTask;
         }
     }
 }

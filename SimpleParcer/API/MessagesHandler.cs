@@ -10,8 +10,7 @@ namespace SimpleParser.API
         private ITelegramBotClient _botClient;
         private CancellationToken _cancellationToken;
 
-        public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update,
-            CancellationToken cancellationToken)
+        public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             _botClient = botClient;
             _cancellationToken = cancellationToken;
