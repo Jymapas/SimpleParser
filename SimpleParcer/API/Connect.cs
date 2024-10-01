@@ -8,14 +8,17 @@ namespace SimpleParser.API
     internal class Connect
     {
         private string _botToken;
-        private MessagesHandler _messagesHandler = new();
+        private readonly MessagesHandler _messagesHandler = new();
 
         internal void Start()
         {
             _botToken = ReadHelper.GetFromTxt(Paths.BotToken);
 
             if (_botToken.Equals(string.Empty))
+            {
+                Console.WriteLine(ServiceLines.TgTokenError);
                 return;
+            }
 
             ITelegramBotClient bot = new TelegramBotClient(_botToken);
             using CancellationTokenSource cts = new();

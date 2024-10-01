@@ -1,13 +1,17 @@
 ﻿using SimpleParser.API;
+using SimpleParser.Helpers;
 
 namespace SimpleParser
 {
     internal class Program
     {
-        private static async Task Main(string[] args)
+        static void Main(string[] args)
         {
-            Connect connect = new();
-            connect.Start();
+            if (FileExist.CheckExistence())
+            {
+                Connect connect = new();
+                connect.Start();
+            }
 
             Console.ReadLine();
         }

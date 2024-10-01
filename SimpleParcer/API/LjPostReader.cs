@@ -1,48 +1,99 @@
 ﻿using HtmlAgilityPack;
 using SimpleParser.Constants;
-using System.Web;
+using System.Globalization;
+using System.Text;
 
-namespace SimpleParser.API
+namespace SimpleParser.API;
+
+internal class LjPostReader
 {
-    internal class LjPostReader
+    private readonly DateTime currentDate;
+    private readonly HttpClient httpClient;
+    private readonly CultureInfo culture = new("ru-RU");
+
+    public LjPostReader()
     {
-        internal async Task<string> GetAnnounce()
+        httpClient = new();
+        currentDate = DateTime.Now;
+    }
+
+    internal async Task<string> GetAnnounceAsync()
+    {
+        try
         {
-            var html = await new HttpClient().GetStringAsync(Paths.PostUri);
+            var html = await httpClient.GetStringAsync(Paths.PostUri);
 
             var doc = new HtmlDocument();
             doc.LoadHtml(html);
 
-            var postContent = doc.DocumentNode.SelectSingleNode("//article[contains(@class, 'b-singlepost-body')]");
-            if (postContent != null)
+            // Select the main post content's <p> node.
+            var postContent = doc.DocumentNode.SelectSingleNode("//article[contains(@class, 'b-singlepost-body')]/p");
+            if (postContent == null)
+                return ServiceLines.ReceivingPostError;
+
+            // Extract relevant sections based on the current date.
+            var relevantAnnouncements = ExtractAnnouncementsForToday(postContent);
+
+            if (string.IsNullOrWhiteSpace(relevantAnnouncements))
+                return ServiceLines.NoAnnouncementsToday; // Define this in ServiceLines as appropriate.
+
+            // Clean up the HTML and format it for Telegram.
+            var formattedAnnouncement = ReplaceBr(relevantAnnouncements);
+
+            return formattedAnnouncement;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return ServiceLines.ReceivingPostError;
+        }
+    }
+
+    private string ExtractAnnouncementsForToday(HtmlNode postContent)
+    {
+        var announcements = new StringBuilder();
+        var skipCheck = false;
+
+        // Iterate through all child nodes of the <p> tag.
+        foreach (var node in postContent.ChildNodes)
+        {
+            if (skipCheck 
+                || (node.Name.Equals("b", StringComparison.OrdinalIgnoreCase) 
+                && DateTime.TryParseExact(
+                    node.InnerText, 
+                    Format.Day, 
+                    culture, 
+                    DateTimeStyles.None, 
+                    out var lineDate)
+                && lineDate >= currentDate))
             {
-                var contentHtml = postContent.InnerHtml;
-                var firstBreakIndex = contentHtml.IndexOf("<br><br>");
-                if (firstBreakIndex != -1)
-                {
-                    contentHtml = contentHtml[(firstBreakIndex)..];
-                }
-
-                postContent.InnerHtml = contentHtml;
-
-                foreach (var link in postContent.SelectNodes(".//a[@href]"))
-                {
-                    var href = link.GetAttributeValue("href", string.Empty);
-                    if (!href.StartsWith(ServiceLines.RemovableString))
-                        continue;
-                    href = href.Replace(ServiceLines.RemovableString, "");
-                    href = HttpUtility.UrlDecode(href); // Normalize encoded characters
-                    link.SetAttributeValue("href", href);
-                }
-
-                return ReplaceBr(postContent.InnerHtml);
+                skipCheck = true;
             }
             else
             {
-                return ServiceLines.ReceivingPostError;
+                continue;
             }
+
+            if (node.Name.Equals("a", StringComparison.OrdinalIgnoreCase))
+            {
+                var href = node.GetAttributeValue("href", string.Empty);
+                if (!href.StartsWith(Paths.Removable))
+                {
+                    announcements.Append(node.OuterHtml);
+                    continue;
+                }
+
+                // clean up the href attribute.
+                href = href.Replace(Paths.Removable, "");
+                href = Uri.UnescapeDataString(href); // normalize encoded characters.
+                node.SetAttributeValue("href", href);
+            }
+
+            announcements.Append(node.OuterHtml);
         }
 
-        private string ReplaceBr(string InnerHtml) => InnerHtml.Replace("<br>", "\n");
+        return announcements.ToString();
     }
+
+    private static string ReplaceBr(string html) => html.Replace("<br>", "\n").Replace("<br/>", "\n").Replace("<br />", "\n");
 }

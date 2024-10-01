@@ -10,31 +10,33 @@ namespace SimpleParser.API
         private ITelegramBotClient _botClient;
         private CancellationToken _cancellationToken;
 
-        public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update,
-            CancellationToken cancellationToken)
+        public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             _botClient = botClient;
             _cancellationToken = cancellationToken;
-            if ((update.Type != UpdateType.Message) || (update.Message!.Type != MessageType.Text)) return;
+            if ((update.Type != UpdateType.Message) || (update.Message!.Type != MessageType.Text))
+            {
+                return;
+            }
             var message = update?.Message;
-            var messageText = message.Text.Trim().ToLower();
+            var messageText = message.Text.Trim();
             var chatId = message.Chat.Id;
 
-            if (!messageText.Equals(Commands.Announcement))
+            if (!messageText.Equals(Commands.Announcement, StringComparison.OrdinalIgnoreCase))
             {
+                Console.WriteLine(ServiceLines.UnknownCommand);
                 await SendMessage(chatId, ServiceLines.UnknownCommand);
                 return;
             }
 
             var reader = new LjPostReader();
-            var announceSource = await reader.GetAnnounce();
-            
-            var announce = announceSource == ServiceLines.ReceivingPostError ?
-                announceSource :
-                ServiceLines.TgHead + announceSource;
+            var announceSource = await reader.GetAnnounceAsync();
+
+            var announce = announceSource == ServiceLines.ReceivingPostError
+                ? announceSource
+                : ServiceLines.TgHead + announceSource;
 
             await SendMessage(chatId, announce);
-            return;
         }
 
         public async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
