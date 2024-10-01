@@ -30,7 +30,7 @@ namespace SimpleParser.API
             }
 
             var reader = new LjPostReader();
-            var announceSource = await reader.GetAnnounce();
+            var announceSource = await reader.GetAnnounceAsync();
 
             var announce = announceSource == ServiceLines.ReceivingPostError
                 ? announceSource
