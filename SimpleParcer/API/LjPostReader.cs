@@ -2,27 +2,25 @@
 using SimpleParser.Constants;
 using System.Globalization;
 using System.Text;
-using System.Web;
 
 namespace SimpleParser.API;
 
 internal class LjPostReader
 {
-    private readonly DateTime CurrentDate;
-    private static readonly HttpClient httpClient = new();
-    private CultureInfo culture = new("ru-RU");
-    private string format = "dd MMMM (ddd)";
+    private readonly DateTime currentDate;
+    private readonly HttpClient httpClient;
+    private readonly CultureInfo culture = new("ru-RU");
 
     public LjPostReader()
     {
-        CurrentDate = DateTime.Now;
+        httpClient = new();
+        currentDate = DateTime.Now;
     }
 
     internal async Task<string> GetAnnounceAsync()
     {
         try
         {
-            // Fetch the HTML content asynchronously.
             var html = await httpClient.GetStringAsync(Paths.PostUri);
 
             var doc = new HtmlDocument();
@@ -46,6 +44,7 @@ internal class LjPostReader
         }
         catch (Exception e)
         {
+            Console.WriteLine(e);
             return ServiceLines.ReceivingPostError;
         }
     }
@@ -60,8 +59,13 @@ internal class LjPostReader
         {
             if (skipCheck 
                 || (node.Name.Equals("b", StringComparison.OrdinalIgnoreCase) 
-                && DateTime.TryParseExact(node.InnerText, format, culture, DateTimeStyles.None, out var lineDate)
-                && lineDate >= CurrentDate))
+                && DateTime.TryParseExact(
+                    node.InnerText, 
+                    ServiceLines.DateFormat, 
+                    culture, 
+                    DateTimeStyles.None, 
+                    out var lineDate)
+                && lineDate >= currentDate))
             {
                 skipCheck = true;
             }
@@ -81,7 +85,7 @@ internal class LjPostReader
 
                 // clean up the href attribute.
                 href = href.Replace(ServiceLines.RemovableString, "");
-                href = HttpUtility.UrlDecode(href); // normalize encoded characters.
+                href = Uri.UnescapeDataString(href); // normalize encoded characters.
                 node.SetAttributeValue("href", href);
             }
 

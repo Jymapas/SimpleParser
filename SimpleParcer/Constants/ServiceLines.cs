@@ -8,5 +8,6 @@
         internal const string UnknownCommand = "Unknown command.";
         internal const string RemovableString = "https://www.livejournal.com/away?to=";
         internal const string TgTokenError = "There is no TG token.";
+        internal const string DateFormat = "dd MMMM (ddd)";
     }
 }
