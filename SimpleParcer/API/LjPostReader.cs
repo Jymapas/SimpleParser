@@ -61,7 +61,7 @@ internal class LjPostReader
                 || (node.Name.Equals("b", StringComparison.OrdinalIgnoreCase) 
                 && DateTime.TryParseExact(
                     node.InnerText, 
-                    ServiceLines.DateFormat, 
+                    Format.Day, 
                     culture, 
                     DateTimeStyles.None, 
                     out var lineDate)
@@ -77,14 +77,14 @@ internal class LjPostReader
             if (node.Name.Equals("a", StringComparison.OrdinalIgnoreCase))
             {
                 var href = node.GetAttributeValue("href", string.Empty);
-                if (!href.StartsWith(ServiceLines.RemovableString))
+                if (!href.StartsWith(Paths.Removable))
                 {
                     announcements.Append(node.OuterHtml);
                     continue;
                 }
 
                 // clean up the href attribute.
-                href = href.Replace(ServiceLines.RemovableString, "");
+                href = href.Replace(Paths.Removable, "");
                 href = Uri.UnescapeDataString(href); // normalize encoded characters.
                 node.SetAttributeValue("href", href);
             }
