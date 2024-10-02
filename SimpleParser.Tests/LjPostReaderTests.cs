@@ -76,6 +76,7 @@ namespace SimpleParser.Tests
         [Theory]
         [InlineData("29 сент€бр€ (вс)", "29 сент€бр€")]
         [InlineData("blabla", null)]
+        [InlineData("(вс)", "")]
         public void ExtractDate_ValidText_ReturnsDatePart(string input, string result)
         {
             // Arrange
