@@ -11,17 +11,13 @@ internal class LjPostReader
     private readonly HttpClient httpClient;
     private readonly CultureInfo culture = new("ru-RU");
 
-    public LjPostReader()
-    {
-        httpClient = new();
-        currentDate = DateTime.Now;
-    }
-
     public LjPostReader(DateTime date)
     {
         httpClient = new();
         currentDate = date;
     }
+
+    public LjPostReader() : this(DateTime.Now) { }
 
     internal async Task<string> GetAnnounceAsync()
     {
