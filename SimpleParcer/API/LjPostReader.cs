@@ -62,7 +62,7 @@ internal class LjPostReader
             if (skipCheck 
                 || (node.Name.Equals("b", StringComparison.OrdinalIgnoreCase) 
                 && DateTime.TryParseExact(
-                    ExtractDate(node.InnerText),
+                    ExtractDate(node.InnerText, currentDate),
                     Format.Day,
                     culture,
                     DateTimeStyles.None,
@@ -102,16 +102,16 @@ internal class LjPostReader
         .Replace("<br/>", "\n")
         .Replace("<br />", "\n");
 
-    private static string ExtractDate(string text)
+    private static string ExtractDate(string text, DateTime currentDate)
     {
         // Example boldText: "29 сентября (вс)"
         var parts = text.Split('('); // Split at the day of the week.
-        if (parts.Length <= 1)
+        if (parts.Length <= 1 || !parts[0].Contains(' '))
         {
             return null;
         }
 
-        var datePart = parts[0].Trim(); // "29 сентября"
+        var datePart = string.Concat(parts[0].Trim(), " ", currentDate.Year); // "29 сентября 2024"
 
         return datePart.ToLower();
     }

@@ -2,6 +2,6 @@
 {
     internal class Format
     {
-        internal const string Day = $"dd MMMM";
+        internal const string Day = $"dd MMMM yyyy";
     }
 }
