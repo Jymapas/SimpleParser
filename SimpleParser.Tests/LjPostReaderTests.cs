@@ -2,6 +2,7 @@ using Moq;
 using Moq.Protected;
 using SimpleParser.API;
 using SimpleParser.Constants;
+using System.Reflection;
 
 namespace SimpleParser.Tests
 {
@@ -70,6 +71,22 @@ namespace SimpleParser.Tests
 
             // Assert
             Assert.Equal(ServiceLines.ReceivingPostError, result);
+        }
+
+        [Theory]
+        [InlineData("29 сент€бр€ (вс)", "29 сент€бр€")]
+        [InlineData("blabla", null)]
+        public void ExtractDate_ValidText_ReturnsDatePart(string input, string result)
+        {
+            // Arrange
+            var methodInfo = typeof(LjPostReader)
+                .GetMethod("ExtractDate", BindingFlags.NonPublic | BindingFlags.Static);
+
+            // Act
+            var output = methodInfo.Invoke(null, [input]);
+
+            // Assert
+            Assert.Equal(result, output);
         }
     }
 }
