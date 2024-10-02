@@ -17,6 +17,12 @@ internal class LjPostReader
         currentDate = DateTime.Now;
     }
 
+    public LjPostReader(DateTime date)
+    {
+        httpClient = new();
+        currentDate = date;
+    }
+
     internal async Task<string> GetAnnounceAsync()
     {
         try
