@@ -7,11 +7,12 @@ namespace SimpleParser.Tests
 {
     public class LjPostReaderTests
     {
-        [Fact]
-        public async Task GetAnnounceAsync_ReturnsFormattedAnnouncement_WhenPostExists()
+        [Theory]
+        [InlineData("<article class='b-singlepost-body'><p><b>03 окт€бр€ (чт)</b>Some announcement content</p></article>", "2024-10-03", "Some announcement content")]
+        [InlineData("<article class='b-singlepost-body'><p><b>02 окт€бр€ (чт)</b>Some announcement content</p></article>", "2024-10-03", "There is no new announcements.")]
+        public async Task GetAnnounceAsync_ReturnsFormattedAnnouncement_WhenPostExists(string html, string date, string response)
         {
             // Arrange
-            var html = "<article class='b-singlepost-body'><p><b>03 окт€бр€ (чт)</b>Some announcement content</p></article>";
             var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
 
             mockHttpMessageHandler
@@ -27,7 +28,7 @@ namespace SimpleParser.Tests
                 });
 
             var httpClient = new HttpClient(mockHttpMessageHandler.Object);
-            var ljPostReader = new LjPostReader(DateTime.Parse("2024-10-03"));
+            var ljPostReader = new LjPostReader(DateTime.Parse(date));
             typeof(LjPostReader)
                 .GetField("httpClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                 .SetValue(ljPostReader, httpClient);
@@ -36,7 +37,7 @@ namespace SimpleParser.Tests
             var result = await ljPostReader.GetAnnounceAsync();
 
             // Assert
-            Assert.Contains("Some announcement content", result);
+            Assert.Contains(response, result);
         }
 
         [Fact]
