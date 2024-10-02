@@ -89,5 +89,25 @@ namespace SimpleParser.Tests
             // Assert
             Assert.Equal(result, output);
         }
+
+        [Theory]
+        [InlineData("2024-10-03", "2024-10-04", false)]
+        [InlineData("2024-10-05", "2024-10-04", true)]
+        [InlineData("2024-12-30", "2024-01-04", true)]
+        public void CompareTwoDates_ValidDates_ReturnComparasion(string date1, string date2, bool result)
+        {
+            // Arrange
+            var lineDate = DateTime.Parse(date1);
+            var currentDate = DateTime.Parse(date2);
+            var methodInfo = typeof(LjPostReader)
+                .GetMethod("CompareTwoDates", BindingFlags.NonPublic | BindingFlags.Instance);
+            var instance = new LjPostReader();
+
+            // Act
+            var outout = methodInfo.Invoke(instance, [lineDate, currentDate]);
+
+            // Assert
+            Assert.Equal(outout, result);
+        }
     }
 }
