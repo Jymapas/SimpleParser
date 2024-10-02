@@ -67,7 +67,7 @@ internal class LjPostReader
                     culture,
                     DateTimeStyles.None,
                     out var lineDate)
-                && lineDate >= currentDate))
+                && CompareTwoDates(lineDate, currentDate)))
             {
                 skipCheck = true;
             }
@@ -114,5 +114,14 @@ internal class LjPostReader
         var datePart = parts[0].Trim(); // "29 сентября"
 
         return datePart.ToLower();
+    }
+
+    private bool CompareTwoDates(DateTime lineDate, DateTime currentDate)
+    {
+        if (currentDate.Month == 12 && currentDate.Month > lineDate.Month)
+        {
+            currentDate.AddYears(-1);
+        }
+        return lineDate >= currentDate;
     }
 }
