@@ -1,4 +1,4 @@
-using Moq;
+п»їusing Moq;
 using Moq.Protected;
 using SimpleParser.API;
 using SimpleParser.Constants;
@@ -9,10 +9,10 @@ namespace SimpleParser.Tests
     public class LjPostReaderTests
     {
         [Theory]
-        [InlineData("<article class='b-singlepost-body'><p><b>03 октября (чт)</b>Some announcement content</p></article>", "2024-10-03", "Some announcement content")]
-        [InlineData("<article class='b-singlepost-body'><p><b>02 октября (чт)</b>Some announcement content</p></article>", "2024-10-03", ServiceLines.NoAnnouncementsToday)]
-        [InlineData("<article class='b-singlepost-body'><p><b>30 декабря (вт)</b><br><a href='https://example.com'>Announcement 1</a><br><br><b>02 января (сб)</b><br><a href='https://example.com'>Announcement 2</a></p></article>", "2024-12-30", "Announcement 1")]
-        [InlineData("<article class='b-singlepost-body'><p><b>30 декабря (вт)</b><br><a href='https://example.com'>Announcement 1</a><br><br><b>02 января (сб)</b><br><a href='https://example.com'>Announcement 2</a></p></article>", "2025-01-02", "Announcement 2")]
+        [InlineData("<article class='b-singlepost-body'><p><b>03 РѕРєС‚СЏР±СЂСЏ (С‡С‚)</b>Some announcement content</p></article>", "2024-10-03", "Some announcement content")]
+        [InlineData("<article class='b-singlepost-body'><p><b>02 РѕРєС‚СЏР±СЂСЏ (С‡С‚)</b>Some announcement content</p></article>", "2024-10-03", ServiceLines.NoAnnouncementsToday)]
+        [InlineData("<article class='b-singlepost-body'><p><b>30 РґРµРєР°Р±СЂСЏ (РІС‚)</b><br><a href='https://example.com'>Announcement 1</a><br><br><b>02 СЏРЅРІР°СЂСЏ (СЃР±)</b><br><a href='https://example.com'>Announcement 2</a></p></article>", "2024-12-30", "Announcement 1")]
+        [InlineData("<article class='b-singlepost-body'><p><b>30 РґРµРєР°Р±СЂСЏ (РІС‚)</b><br><a href='https://example.com'>Announcement 1</a><br><br><b>02 СЏРЅРІР°СЂСЏ (СЃР±)</b><br><a href='https://example.com'>Announcement 2</a></p></article>", "2025-01-02", "Announcement 2")]
         public async Task GetAnnounceAsync_ReturnsFormattedAnnouncement_WhenPostExists(string html, string date, string response)
         {
             // Arrange
@@ -74,9 +74,9 @@ namespace SimpleParser.Tests
         }
 
         [Theory]
-        [InlineData("29 сентября (вс)", "29 сентября")]
+        [InlineData("29 СЃРµРЅС‚СЏР±СЂСЏ (РІСЃ)", "29 СЃРµРЅС‚СЏР±СЂСЏ 2024")]
         [InlineData("blabla", null)]
-        [InlineData("(вс)", "")]
+        [InlineData("(РІСЃ)", null)]
         public void ExtractDate_ValidText_ReturnsDatePart(string input, string result)
         {
             // Arrange
@@ -84,7 +84,7 @@ namespace SimpleParser.Tests
                 .GetMethod("ExtractDate", BindingFlags.NonPublic | BindingFlags.Static);
 
             // Act
-            var output = methodInfo.Invoke(null, [input]);
+            var output = methodInfo.Invoke(null, [input, DateTime.Parse("2024-01-01")]);
 
             // Assert
             Assert.Equal(result, output);
