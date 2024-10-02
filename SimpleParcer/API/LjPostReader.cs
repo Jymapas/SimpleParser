@@ -62,7 +62,7 @@ internal class LjPostReader
             if (skipCheck 
                 || (node.Name.Equals("b", StringComparison.OrdinalIgnoreCase) 
                 && DateTime.TryParseExact(
-                    node.InnerText,
+                    ExtractDate(node.InnerText),
                     Format.Day,
                     culture,
                     DateTimeStyles.None,
