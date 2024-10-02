@@ -9,7 +9,7 @@ namespace SimpleParser.Tests
     {
         [Theory]
         [InlineData("<article class='b-singlepost-body'><p><b>03 окт€бр€ (чт)</b>Some announcement content</p></article>", "2024-10-03", "Some announcement content")]
-        [InlineData("<article class='b-singlepost-body'><p><b>02 окт€бр€ (чт)</b>Some announcement content</p></article>", "2024-10-03", "There is no new announcements.")]
+        [InlineData("<article class='b-singlepost-body'><p><b>02 окт€бр€ (чт)</b>Some announcement content</p></article>", "2024-10-03", ServiceLines.ReceivingPostError)]
         public async Task GetAnnounceAsync_ReturnsFormattedAnnouncement_WhenPostExists(string html, string date, string response)
         {
             // Arrange
