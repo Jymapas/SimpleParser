@@ -5,17 +5,11 @@ using System.Text;
 
 namespace SimpleParser.API;
 
-internal class LjPostReader
+internal class LjPostReader : IPostReader
 {
     private readonly DateTime currentDate;
     private readonly HttpClient httpClient;
     private readonly CultureInfo culture = new("ru-RU");
-
-    public LjPostReader()
-    {
-        httpClient = new();
-        currentDate = DateTime.Now;
-    }
 
     public LjPostReader(DateTime date)
     {
@@ -23,7 +17,9 @@ internal class LjPostReader
         currentDate = date;
     }
 
-    internal async Task<string> GetAnnounceAsync()
+    public LjPostReader() : this(DateTime.Now) { }
+
+    public async Task<string> GetAnnounceAsync()
     {
         try
         {
@@ -66,12 +62,12 @@ internal class LjPostReader
             if (skipCheck 
                 || (node.Name.Equals("b", StringComparison.OrdinalIgnoreCase) 
                 && DateTime.TryParseExact(
-                    node.InnerText, 
-                    Format.Day, 
-                    culture, 
-                    DateTimeStyles.None, 
+                    ExtractDate(node.InnerText, currentDate),
+                    Format.Day,
+                    culture,
+                    DateTimeStyles.None,
                     out var lineDate)
-                && lineDate >= currentDate))
+                && CompareTwoDates(lineDate, currentDate)))
             {
                 skipCheck = true;
             }
@@ -101,5 +97,31 @@ internal class LjPostReader
         return announcements.ToString();
     }
 
-    private static string ReplaceBr(string html) => html.Replace("<br>", "\n").Replace("<br/>", "\n").Replace("<br />", "\n");
+    private static string ReplaceBr(string html) => html
+        .Replace("<br>", "\n")
+        .Replace("<br/>", "\n")
+        .Replace("<br />", "\n");
+
+    private static string ExtractDate(string text, DateTime currentDate)
+    {
+        // Example boldText: "29 сентября (вс)"
+        var parts = text.Split('('); // Split at the day of the week.
+        if (parts.Length <= 1 || !parts[0].Contains(' '))
+        {
+            return null;
+        }
+
+        var datePart = string.Concat(parts[0].Trim(), ' ', currentDate.Year); // "29 сентября 2024"
+
+        return datePart.ToLower();
+    }
+
+    private bool CompareTwoDates(DateTime lineDate, DateTime currentDate)
+    {
+        if (currentDate.Month == 12 && currentDate.Month > lineDate.Month)
+        {
+            currentDate.AddYears(-1);
+        }
+        return lineDate >= currentDate;
+    }
 }

@@ -2,6 +2,7 @@
 {
     internal class Format
     {
-        internal const string Day = $"d MMMM (ddd)";
+        internal const string Day = $"dd MMMM yyyy";
+        internal const string DateArgument = "yyyy-MM-dd";
     }
 }
