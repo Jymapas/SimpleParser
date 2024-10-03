@@ -5,7 +5,14 @@ VisualStudioVersion = 17.8.34408.163
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleParser", "SimpleParcer\SimpleParser.csproj", "{D1B40D3C-0A8E-495F-AB0F-CD5BED677D72}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleParser.Tests", "SimpleParser.Tests\SimpleParser.Tests.csproj", "{4C09B3FD-67A2-4079-BD6D-691E628792E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleParser.Tests", "SimpleParser.Tests\SimpleParser.Tests.csproj", "{4C09B3FD-67A2-4079-BD6D-691E628792E7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{9FC2A2F4-478E-4E3C-957C-6CF46272B417}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{A47E54C6-B9CA-4D5A-B0AA-DC3539858BC3}"
+	ProjectSection(SolutionItems) = preProject
+		ci.yml = ci.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,6 +31,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A47E54C6-B9CA-4D5A-B0AA-DC3539858BC3} = {9FC2A2F4-478E-4E3C-957C-6CF46272B417}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0C229746-234E-4896-8062-61E4BE4D5B2B}

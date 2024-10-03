@@ -2,6 +2,7 @@
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using SimpleParser.Constants;
+using System.Globalization;
 
 namespace SimpleParser.API
 {
@@ -9,6 +10,7 @@ namespace SimpleParser.API
     {
         private ITelegramBotClient _botClient;
         private CancellationToken _cancellationToken;
+        private IPostReader _reader;
 
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
@@ -22,15 +24,38 @@ namespace SimpleParser.API
             var messageText = message.Text.Trim();
             var chatId = message.Chat.Id;
 
-            if (!messageText.Equals(Commands.Announcement, StringComparison.OrdinalIgnoreCase))
+            var messageParts = messageText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var command = messageParts.First();
+
+            if (!command.Equals(Commands.Announcement, StringComparison.OrdinalIgnoreCase))
             {
                 Console.WriteLine(ServiceLines.UnknownCommand);
                 await SendMessage(chatId, ServiceLines.UnknownCommand);
                 return;
             }
 
-            var reader = new LjPostReader();
-            var announceSource = await reader.GetAnnounceAsync();
+            if (messageParts.Length > 1)
+            {
+                var dateArgument = messageParts[1];
+                if (!DateTime.TryParseExact(
+                    dateArgument, 
+                    Format.DateArgument, 
+                    CultureInfo.InvariantCulture, 
+                    DateTimeStyles.None, 
+                    out var parsedDate))
+                {
+                    await SendMessage(chatId, ServiceLines.ArgumentError);
+                    return;
+                }
+
+                _reader = new LjPostReader(parsedDate);
+            }
+            else
+            {
+                _reader = new LjPostReader();
+            }
+
+            var announceSource = await _reader.GetAnnounceAsync();
 
             var announce = announceSource == ServiceLines.ReceivingPostError
                 ? announceSource
