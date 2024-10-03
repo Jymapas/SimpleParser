@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SimpleParser.API;
 
-internal class LjPostReader
+internal class LjPostReader : IPostReader
 {
     private readonly DateTime currentDate;
     private readonly HttpClient httpClient;
@@ -19,7 +19,7 @@ internal class LjPostReader
 
     public LjPostReader() : this(DateTime.Now) { }
 
-    internal async Task<string> GetAnnounceAsync()
+    public async Task<string> GetAnnounceAsync()
     {
         try
         {
@@ -111,7 +111,7 @@ internal class LjPostReader
             return null;
         }
 
-        var datePart = string.Concat(parts[0].Trim(), " ", currentDate.Year); // "29 сентября 2024"
+        var datePart = string.Concat(parts[0].Trim(), ' ', currentDate.Year); // "29 сентября 2024"
 
         return datePart.ToLower();
     }
