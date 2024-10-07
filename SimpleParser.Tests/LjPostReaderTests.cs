@@ -10,7 +10,8 @@ namespace SimpleParser.Tests
     {
         [Theory]
         [InlineData("<article class='b-singlepost-body'><p><b>03 октября (чт)</b>Some announcement content</p></article>", "2024-10-03", "Some announcement content")]
-        [InlineData("<article class='b-singlepost-body'><p><b>02 октября (чт)</b>Some announcement content</p></article>", "2024-10-03", ServiceLines.NoAnnouncementsToday)]
+        [InlineData("<article class='b-singlepost-body'><p><b>02 октября (ср)</b>Some announcement content</p></article>", "2024-10-03", ServiceLines.NoAnnouncementsToday)]
+        [InlineData("<article class='b-singlepost-body'><p>Some pre-content.<br><br><b>06 октября (вс)</b><br><a href=\"https://test.com/\">Sunday contennt</a><br><br><b>07 октября (пн)</b><br><a href=\"https://test.com/\">Monday content</a><br><br><b>08 октября (вт)</b><br><a href=\"https://test.com/\">Tuesday content</a></p></article>", "2024-10-07 10:30", "Monday content")]
         [InlineData("<article class='b-singlepost-body'><p><b>30 декабря (вт)</b><br><a href='https://example.com'>Announcement 1</a><br><br><b>02 января (сб)</b><br><a href='https://example.com'>Announcement 2</a></p></article>", "2024-12-30", "Announcement 1")]
         [InlineData("<article class='b-singlepost-body'><p><b>30 декабря (вт)</b><br><a href='https://example.com'>Announcement 1</a><br><br><b>02 января (сб)</b><br><a href='https://example.com'>Announcement 2</a></p></article>", "2025-01-02", "Announcement 2")]
         public async Task GetAnnounceAsync_ReturnsFormattedAnnouncement_WhenPostExists(string html, string date, string response)
