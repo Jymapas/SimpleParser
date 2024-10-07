@@ -118,10 +118,14 @@ internal class LjPostReader : IPostReader
 
     private bool CompareTwoDates(DateTime lineDate, DateTime currentDate)
     {
+        DateTime currentDateWithoutTime = currentDate.Date;
+        DateTime lineDateWithoutTime = lineDate.Date;
+
         if (currentDate.Month == 12 && currentDate.Month > lineDate.Month)
         {
-            currentDate.AddYears(-1);
+            currentDateWithoutTime = currentDateWithoutTime.AddYears(-1);
         }
-        return lineDate >= currentDate;
+
+        return lineDateWithoutTime >= currentDateWithoutTime;
     }
 }
