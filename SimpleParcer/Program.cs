@@ -7,11 +7,8 @@ namespace SimpleParser
     {
         static void Main(string[] args)
         {
-            if (FileExist.CheckExistence())
-            {
-                Connect connect = new();
-                connect.Start();
-            }
+            Connect connect = new();
+            connect.Start();
 
             Console.ReadLine();
         }
