@@ -365,3 +365,5 @@ FodyWeavers.xsd
 .idea/.idea.SimpleParcer/.idea
 
 appsettings.json
+
+SimpleParcer/Properties/launchSettings.json

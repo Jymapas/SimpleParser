@@ -13,14 +13,8 @@ namespace SimpleParser.API
 
         internal void Start()
         {
-            IConfiguration config = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", false)
-                .Build();
+            _botToken = Environment.GetEnvironmentVariable("BOT_TOKEN") ?? string.Empty;
             
-            var botConfig = config.GetSection("BotConfig").Get<BotConfig>();
-            _botToken = botConfig.BotToken;
-
             if (_botToken.Equals(string.Empty))
             {
                 Console.WriteLine(ServiceLines.TgTokenError);
