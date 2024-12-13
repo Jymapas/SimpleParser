@@ -1,15 +1,15 @@
-﻿using HtmlAgilityPack;
-using SimpleParser.Constants;
 using System.Globalization;
 using System.Text;
+using HtmlAgilityPack;
+using SimpleParser.Constants;
 
 namespace SimpleParser.API;
 
 internal class LjPostReader : IPostReader
 {
+    private readonly CultureInfo _culture = new("ru-RU");
     private readonly DateTime _currentDate;
     private readonly HttpClient _httpClient = new();
-    private readonly CultureInfo _culture = new("ru-RU");
 
     public LjPostReader(DateTime date)
     {
@@ -30,13 +30,17 @@ internal class LjPostReader : IPostReader
             // Select the main post content's <p> node.
             var postContent = doc.DocumentNode.SelectSingleNode("//article[contains(@class, 'b-singlepost-body')]/p");
             if (postContent == null)
+            {
                 return ServiceLines.ReceivingPostError;
+            }
 
             // Extract relevant sections based on the current date.
             var relevantAnnouncements = ExtractAnnouncementsForToday(postContent);
 
             if (string.IsNullOrWhiteSpace(relevantAnnouncements))
+            {
                 return ServiceLines.NoAnnouncementsToday; // Define this in ServiceLines as appropriate.
+            }
 
             // Clean up the HTML and format it for Telegram.
             var formattedAnnouncement = ReplaceBr(relevantAnnouncements);
@@ -58,15 +62,15 @@ internal class LjPostReader : IPostReader
         // Iterate through all child nodes of the <p> tag.
         foreach (var node in postContent.ChildNodes)
         {
-            if (skipCheck 
-                || (node.Name.Equals("b", StringComparison.OrdinalIgnoreCase) 
-                && DateTime.TryParseExact(
-                    ExtractDate(node.InnerText, _currentDate),
-                    Format.Day,
-                    _culture,
-                    DateTimeStyles.None,
-                    out var lineDate)
-                && CompareTwoDates(lineDate, _currentDate)))
+            if (skipCheck
+                || (node.Name.Equals("b", StringComparison.OrdinalIgnoreCase)
+                    && DateTime.TryParseExact(
+                        ExtractDate(node.InnerText, _currentDate),
+                        Format.Day,
+                        _culture,
+                        DateTimeStyles.None,
+                        out var lineDate)
+                    && CompareTwoDates(lineDate, _currentDate)))
             {
                 skipCheck = true;
             }

@@ -1,8 +1,10 @@
-﻿using Telegram.Bot;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
+﻿using Newtonsoft.Json;
 using SimpleParser.Constants;
 using System.Globalization;
+using System.Text;
+using Telegram.Bot;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace SimpleParser.API
 {
@@ -11,12 +13,13 @@ namespace SimpleParser.API
         private ITelegramBotClient _botClient;
         private CancellationToken _cancellationToken;
         private IPostReader _reader;
+        private bool _isPreviousRequest = false; 
 
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             _botClient = botClient;
             _cancellationToken = cancellationToken;
-            if ((update.Type != UpdateType.Message) || (update.Message!.Type != MessageType.Text))
+            if (update.Type != UpdateType.Message || update.Message!.Type != MessageType.Text)
             {
                 return;
             }
@@ -38,16 +41,17 @@ namespace SimpleParser.API
             {
                 var dateArgument = messageParts[1];
                 if (!DateTime.TryParseExact(
-                    dateArgument, 
-                    Format.DateArgument, 
-                    CultureInfo.InvariantCulture, 
-                    DateTimeStyles.None, 
+                    dateArgument,
+                    Format.DateArgument,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
                     out var parsedDate))
                 {
                     await SendMessage(chatId, ServiceLines.ArgumentError);
                     return;
                 }
 
+                _isPreviousRequest = true;
                 _reader = new LjPostReader(parsedDate);
             }
             else
@@ -56,29 +60,45 @@ namespace SimpleParser.API
             }
 
             var announceSource = await _reader.GetAnnounceAsync();
+            
+            var announce = new StringBuilder();
+            if (announceSource == ServiceLines.ReceivingPostError)
+            {
+                await SendMessage(chatId, ServiceLines.ReceivingPostError);
+                return;
+            }
+            
+            announce.Append(ServiceLines.TgHead);
+            announce.AppendLine();
+            
+            if (_isPreviousRequest)
+            {
+                announce.Append(ServiceLines.PostWasUpdated);
+                announce.Append(DateTime.Now.ToString("dd.MM.yyyy."));
+                announce.AppendLine();
+            }
+            
+            announce.AppendLine();
+            announce.AppendLine(announceSource);
 
-            var announce = announceSource == ServiceLines.ReceivingPostError
-                ? announceSource
-                : ServiceLines.TgHead + announceSource;
-
-            await SendMessage(chatId, announce);
+            await SendMessage(chatId, announce.ToString());
         }
 
         public async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
-            Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(exception));
+            Console.WriteLine(JsonConvert.SerializeObject(exception));
         }
 
         /// <summary>
-        /// Отправка сообщений ботом
+        ///     Отправка сообщений ботом
         /// </summary>
         /// <param name="id">Id пользователя, чата или канала, куда будет отправлено сообщение</param>
         /// <param name="text">Текст сообщения в HTML формате</param>
         private async Task SendMessage(ChatId id, string text)
         {
             await _botClient.SendTextMessageAsync(
-                chatId: id,
-                text: text,
+                id,
+                text,
                 parseMode: ParseMode.Html,
                 disableWebPagePreview: true,
                 cancellationToken: _cancellationToken
