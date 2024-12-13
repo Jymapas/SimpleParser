@@ -7,14 +7,13 @@ namespace SimpleParser.API;
 
 internal class LjPostReader : IPostReader
 {
-    private readonly DateTime currentDate;
-    private readonly HttpClient httpClient;
-    private readonly CultureInfo culture = new("ru-RU");
+    private readonly DateTime _currentDate;
+    private readonly HttpClient _httpClient = new();
+    private readonly CultureInfo _culture = new("ru-RU");
 
     public LjPostReader(DateTime date)
     {
-        httpClient = new();
-        currentDate = date;
+        _currentDate = date;
     }
 
     public LjPostReader() : this(DateTime.Now) { }
@@ -23,7 +22,7 @@ internal class LjPostReader : IPostReader
     {
         try
         {
-            var html = await httpClient.GetStringAsync(Paths.PostUri);
+            var html = await _httpClient.GetStringAsync(Paths.PostUri);
 
             var doc = new HtmlDocument();
             doc.LoadHtml(html);
@@ -62,12 +61,12 @@ internal class LjPostReader : IPostReader
             if (skipCheck 
                 || (node.Name.Equals("b", StringComparison.OrdinalIgnoreCase) 
                 && DateTime.TryParseExact(
-                    ExtractDate(node.InnerText, currentDate),
+                    ExtractDate(node.InnerText, _currentDate),
                     Format.Day,
-                    culture,
+                    _culture,
                     DateTimeStyles.None,
                     out var lineDate)
-                && CompareTwoDates(lineDate, currentDate)))
+                && CompareTwoDates(lineDate, _currentDate)))
             {
                 skipCheck = true;
             }
@@ -118,8 +117,8 @@ internal class LjPostReader : IPostReader
 
     private bool CompareTwoDates(DateTime lineDate, DateTime currentDate)
     {
-        DateTime currentDateWithoutTime = currentDate.Date;
-        DateTime lineDateWithoutTime = lineDate.Date;
+        var currentDateWithoutTime = currentDate.Date;
+        var lineDateWithoutTime = lineDate.Date;
 
         if (currentDate.Month == 12 && currentDate.Month > lineDate.Month)
         {
