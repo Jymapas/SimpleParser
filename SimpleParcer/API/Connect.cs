@@ -1,4 +1,5 @@
-﻿using SimpleParser.Helpers;
+﻿using Microsoft.Extensions.Configuration;
+using SimpleParser.Helpers;
 using SimpleParser.Constants;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
@@ -12,7 +13,13 @@ namespace SimpleParser.API
 
         internal void Start()
         {
-            _botToken = ReadHelper.GetFromTxt(Paths.BotToken);
+            IConfiguration config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", false)
+                .Build();
+            
+            var botConfig = config.GetSection("BotConfig").Get<BotConfig>();
+            _botToken = botConfig.BotToken;
 
             if (_botToken.Equals(string.Empty))
             {

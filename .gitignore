@@ -363,3 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 *.xml
 .idea/.idea.SimpleParcer/.idea
+
+appsettings.json
