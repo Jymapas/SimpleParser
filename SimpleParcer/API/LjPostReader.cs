@@ -1,20 +1,19 @@
-﻿using HtmlAgilityPack;
-using SimpleParser.Constants;
 using System.Globalization;
 using System.Text;
+using HtmlAgilityPack;
+using SimpleParser.Constants;
 
 namespace SimpleParser.API;
 
 internal class LjPostReader : IPostReader
 {
-    private readonly DateTime currentDate;
-    private readonly HttpClient httpClient;
-    private readonly CultureInfo culture = new("ru-RU");
+    private readonly CultureInfo _culture = new("ru-RU");
+    private readonly DateTime _currentDate;
+    private readonly HttpClient _httpClient = new();
 
     public LjPostReader(DateTime date)
     {
-        httpClient = new();
-        currentDate = date;
+        _currentDate = date;
     }
 
     public LjPostReader() : this(DateTime.Now) { }
@@ -23,7 +22,7 @@ internal class LjPostReader : IPostReader
     {
         try
         {
-            var html = await httpClient.GetStringAsync(Paths.PostUri);
+            var html = await _httpClient.GetStringAsync(Paths.PostUri);
 
             var doc = new HtmlDocument();
             doc.LoadHtml(html);
@@ -31,13 +30,17 @@ internal class LjPostReader : IPostReader
             // Select the main post content's <p> node.
             var postContent = doc.DocumentNode.SelectSingleNode("//article[contains(@class, 'b-singlepost-body')]/p");
             if (postContent == null)
+            {
                 return ServiceLines.ReceivingPostError;
+            }
 
             // Extract relevant sections based on the current date.
             var relevantAnnouncements = ExtractAnnouncementsForToday(postContent);
 
             if (string.IsNullOrWhiteSpace(relevantAnnouncements))
+            {
                 return ServiceLines.NoAnnouncementsToday; // Define this in ServiceLines as appropriate.
+            }
 
             // Clean up the HTML and format it for Telegram.
             var formattedAnnouncement = ReplaceBr(relevantAnnouncements);
@@ -59,15 +62,15 @@ internal class LjPostReader : IPostReader
         // Iterate through all child nodes of the <p> tag.
         foreach (var node in postContent.ChildNodes)
         {
-            if (skipCheck 
-                || (node.Name.Equals("b", StringComparison.OrdinalIgnoreCase) 
-                && DateTime.TryParseExact(
-                    ExtractDate(node.InnerText, currentDate),
-                    Format.Day,
-                    culture,
-                    DateTimeStyles.None,
-                    out var lineDate)
-                && CompareTwoDates(lineDate, currentDate)))
+            if (skipCheck
+                || (node.Name.Equals("b", StringComparison.OrdinalIgnoreCase)
+                    && DateTime.TryParseExact(
+                        ExtractDate(node.InnerText, _currentDate),
+                        Format.Day,
+                        _culture,
+                        DateTimeStyles.None,
+                        out var lineDate)
+                    && CompareTwoDates(lineDate, _currentDate)))
             {
                 skipCheck = true;
             }
@@ -118,8 +121,8 @@ internal class LjPostReader : IPostReader
 
     private bool CompareTwoDates(DateTime lineDate, DateTime currentDate)
     {
-        DateTime currentDateWithoutTime = currentDate.Date;
-        DateTime lineDateWithoutTime = lineDate.Date;
+        var currentDateWithoutTime = currentDate.Date;
+        var lineDateWithoutTime = lineDate.Date;
 
         if (currentDate.Month == 12 && currentDate.Month > lineDate.Month)
         {
