@@ -5,12 +5,13 @@ namespace SimpleParser
 {
     internal class Program
     {
-        static void Main(string[] args)
+        async static Task Main(string[] args)
         {
             Connect connect = new();
-            connect.Start();
+            await connect.Start();
 
-            Console.ReadLine();
+            // Console.ReadLine();
+            Console.WriteLine("Unexpected end of program.");
         }
     }
 }

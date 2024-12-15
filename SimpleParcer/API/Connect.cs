@@ -11,7 +11,7 @@ namespace SimpleParser.API
         private string _botToken;
         private readonly MessagesHandler _messagesHandler = new();
 
-        internal void Start()
+        internal async Task Start()
         {
             _botToken = Environment.GetEnvironmentVariable("BOT_TOKEN") ?? string.Empty;
             
@@ -35,6 +35,8 @@ namespace SimpleParser.API
                 receiverOptions,
                 cancellationToken
             );
+            
+            await Task.Delay(Timeout.Infinite, cancellationToken);
         }
     }
 }
