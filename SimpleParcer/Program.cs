@@ -5,15 +5,13 @@ namespace SimpleParser
 {
     internal class Program
     {
-        static void Main(string[] args)
+        async static Task Main(string[] args)
         {
-            if (FileExist.CheckExistence())
-            {
-                Connect connect = new();
-                connect.Start();
-            }
+            Connect connect = new();
+            await connect.Start();
 
-            Console.ReadLine();
+            // Console.ReadLine();
+            Console.WriteLine("Unexpected end of program.");
         }
     }
 }

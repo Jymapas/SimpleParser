@@ -11,16 +11,10 @@ namespace SimpleParser.API
         private string _botToken;
         private readonly MessagesHandler _messagesHandler = new();
 
-        internal void Start()
+        internal async Task Start()
         {
-            IConfiguration config = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", false)
-                .Build();
+            _botToken = Environment.GetEnvironmentVariable("BOT_TOKEN") ?? string.Empty;
             
-            var botConfig = config.GetSection("BotConfig").Get<BotConfig>();
-            _botToken = botConfig.BotToken;
-
             if (_botToken.Equals(string.Empty))
             {
                 Console.WriteLine(ServiceLines.TgTokenError);
@@ -41,6 +35,8 @@ namespace SimpleParser.API
                 receiverOptions,
                 cancellationToken
             );
+            
+            await Task.Delay(Timeout.Infinite, cancellationToken);
         }
     }
 }
