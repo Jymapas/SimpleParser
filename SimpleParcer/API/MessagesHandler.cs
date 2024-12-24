@@ -43,7 +43,7 @@ namespace SimpleParser.API
             else
             {
                 Console.WriteLine(ServiceLines.UnknownCommand);
-                await SendMessage(chatId, ServiceLines.UnknownCommand);
+                await SendTextMessage(chatId, ServiceLines.UnknownCommand);
             }
         }
 
@@ -60,7 +60,7 @@ namespace SimpleParser.API
                     out var parsedDate))
                 {
                     _isPreviousRequest = true;
-                    await SendMessage(chatId, ServiceLines.ArgumentError);
+                    await SendTextMessage(chatId, ServiceLines.ArgumentError);
                     return;
                 }
 
@@ -102,7 +102,7 @@ namespace SimpleParser.API
         {
             if (announceSource == ServiceLines.ReceivingPostError)
             {
-                await SendMessage(chatId, ServiceLines.ReceivingPostError);
+                await SendTextMessage(chatId, ServiceLines.ReceivingPostError);
                 return;
             }
 
@@ -120,7 +120,7 @@ namespace SimpleParser.API
             announce.AppendLine();
             announce.AppendLine(announceSource);
 
-            await SendMessage(chatId, announce.ToString());
+            await SendTextMessage(chatId, announce.ToString());
         }
 
         public async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
@@ -133,13 +133,13 @@ namespace SimpleParser.API
         /// </summary>
         /// <param name="id">Id пользователя, чата или канала, куда будет отправлено сообщение</param>
         /// <param name="text">Текст сообщения в HTML формате</param>
-        private async Task SendMessage(ChatId id, string text)
+        private async Task SendTextMessage(ChatId id, string text)
         {
-            await _botClient.SendTextMessageAsync(
+            await _botClient.SendMessage(
                 id,
                 text,
                 parseMode: ParseMode.Html,
-                disableWebPagePreview: true,
+                linkPreviewOptions: true,
                 cancellationToken: _cancellationToken
             );
         }
