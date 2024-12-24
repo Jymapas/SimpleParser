@@ -36,7 +36,7 @@ namespace SimpleParser.API
             {
                 await HandleAnnouncementCommand(chatId, messageParts);
             }
-            else if (command.Equals("/recent", StringComparison.OrdinalIgnoreCase))
+            else if (command.Equals(Commands.Recent, StringComparison.OrdinalIgnoreCase))
             {
                 await HandleRecentCommand(chatId);
             }
