@@ -1,4 +1,4 @@
-﻿using SimpleParser.Constants;
+using SimpleParser.Constants;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -83,22 +83,28 @@ namespace SimpleParser.API
                     await Task.Delay(delay);
 
                     // Отправка поста
-                    await _postScheduler.SendPostAsync(bot, channelId);
+                    await _postScheduler.SendPost(bot, channelId, _cancellationToken);
                 }
-                catch (Exception ex)
+                catch (OperationCanceledException e)
                 {
-                    Console.WriteLine($"Ошибка при выполнении задачи: {ex.Message}");
+                    Console.WriteLine($"Операция отменена: {e.Message}");
+                    break;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Ошибка при выполнении задачи: {e.Message}");
                 }
         }
 
         private DateTime CalculateNextRunTime(DateTime now)
         {
-            var nextRun = now.Date.AddHours(12); // Текущее время 12:00
+            const double postHour = 12;
+            var nextRun = now.Date.AddHours(postHour); // Текущее время 12:00
 
             switch (now.DayOfWeek)
             {
-                case DayOfWeek.Monday when now.TimeOfDay < TimeSpan.FromHours(12):
-                case DayOfWeek.Thursday when now.TimeOfDay < TimeSpan.FromHours(12):
+                case DayOfWeek.Monday when now.TimeOfDay < TimeSpan.FromHours(postHour):
+                case DayOfWeek.Thursday when now.TimeOfDay < TimeSpan.FromHours(postHour):
                     return nextRun;
                 default:
                 {

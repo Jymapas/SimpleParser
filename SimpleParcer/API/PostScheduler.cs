@@ -14,7 +14,7 @@ namespace SimpleParser.API
             _postReaderFactory = postReaderFactory;
         }
 
-        public async Task SendPostAsync(ITelegramBotClient bot, ChatId channelId)
+        public async Task SendPost(ITelegramBotClient bot, ChatId channelId, CancellationToken cancellationToken)
         {
             var postReader = _postReaderFactory(DateTime.Now);
             var postContent = await postReader.GetAnnounceAsync();
@@ -28,7 +28,8 @@ namespace SimpleParser.API
             await bot.SendMessage(
                 channelId,
                 postContent,
-                ParseMode.Html
+                ParseMode.Html,
+                cancellationToken: cancellationToken
             );
         }
     }
