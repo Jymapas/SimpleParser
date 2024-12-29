@@ -1,35 +1,33 @@
 using SimpleParser.Constants;
 using Telegram.Bot;
-using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
 namespace SimpleParser.API
 {
-    internal class PostScheduler(IPostReader postReader, CancellationToken cancellationToken)
+    internal class PostScheduler
     {
-        /// <summary>
-        ///     Отправляет пост в указанный канал Telegram.
-        /// </summary>
-        /// <param name="bot">Экземпляр TelegramBotClient.</param>
-        /// <param name="channelId">ID канала, куда отправляется сообщение.</param>
-        /// <param name="date">Дата, для которой формируется пост.</param>
-        public async Task SendPostAsync(ITelegramBotClient bot, ChatId channelId)
+        private readonly Func<DateTime, IPostReader> _postReaderFactory;
+
+        public PostScheduler(Func<DateTime, IPostReader> postReaderFactory)
         {
-            // Установить дату для получения поста
+            _postReaderFactory = postReaderFactory;
+        }
+
+        public async Task SendPostAsync(ITelegramBotClient bot, long channelId)
+        {
+            var postReader = _postReaderFactory(DateTime.Now);
             var postContent = await postReader.GetAnnounceAsync();
 
             if (postContent == ServiceLines.ReceivingPostError)
             {
-                Console.WriteLine("Ошибка получения поста.");
+                Console.WriteLine(postContent);
                 return;
             }
 
             await bot.SendMessage(
                 channelId,
                 postContent,
-                ParseMode.Html,
-                linkPreviewOptions: true,
-                cancellationToken: cancellationToken
+                ParseMode.Html
             );
         }
     }
