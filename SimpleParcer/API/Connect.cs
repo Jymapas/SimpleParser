@@ -1,4 +1,4 @@
-﻿using SimpleParser.Constants;
+using SimpleParser.Constants;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -60,6 +60,58 @@ namespace SimpleParser.API
                 BotCommandScope.AllPrivateChats(),
                 cancellationToken: _cancellationToken
             );
+        }
+        
+        private async Task StartScheduledTask(ITelegramBotClient bot, ChatId channelId)
+        {
+            while (true)
+            {
+                try
+                {
+                    var now = DateTime.Now;
+                    var nextRun = CalculateNextRunTime(now);
+
+                    var delay = nextRun - now;
+                    Console.WriteLine($"Следующее срабатывание: {nextRun} через {delay}");
+
+                    // Ожидание до следующего срабатывания
+                    await Task.Delay(delay);
+
+                    // Отправка поста
+                    await _postScheduler.SendPostAsync(bot, channelId);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Ошибка при выполнении задачи: {ex.Message}");
+                }
+            }
+        }
+        
+        private DateTime CalculateNextRunTime(DateTime now)
+        {
+            var nextRun = now.Date.AddHours(12); // Текущее время 12:00
+
+            switch (now.DayOfWeek)
+            {
+                case DayOfWeek.Monday when now.TimeOfDay < TimeSpan.FromHours(12):
+                case DayOfWeek.Thursday when now.TimeOfDay < TimeSpan.FromHours(12):
+                    return nextRun;
+                default:
+                {
+                    var daysToAdd = now.DayOfWeek switch
+                    {
+                        DayOfWeek.Monday => 3, // Следующий четверг
+                        DayOfWeek.Tuesday => 2, // Следующий четверг
+                        DayOfWeek.Wednesday => 1, // Следующий четверг
+                        DayOfWeek.Thursday => 4, // Следующий понедельник
+                        DayOfWeek.Friday => 3, // Следующий понедельник
+                        DayOfWeek.Saturday => 2, // Следующий понедельник
+                        DayOfWeek.Sunday => 1, // Следующий понедельник
+                        _ => throw new InvalidOperationException("Неверный день недели"),
+                    };
+                    return nextRun.AddDays(daysToAdd);
+                }
+            }
         }
     }
 }
