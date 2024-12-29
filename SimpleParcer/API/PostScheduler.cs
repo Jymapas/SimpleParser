@@ -29,6 +29,7 @@ namespace SimpleParser.API
                 channelId,
                 postContent,
                 ParseMode.Html,
+                linkPreviewOptions: true,
                 cancellationToken: cancellationToken
             );
         }
