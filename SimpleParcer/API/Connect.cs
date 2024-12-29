@@ -1,4 +1,4 @@
-using SimpleParser.Constants;
+﻿using SimpleParser.Constants;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -98,13 +98,13 @@ namespace SimpleParser.API
 
         private DateTime CalculateNextRunTime(DateTime now)
         {
-            const double postHour = 12;
-            var nextRun = now.Date.AddHours(postHour); // Текущее время 12:00
+            var postTime = new TimeSpan(12, 00, 0);
+            var nextRun = now.Date + postTime;
 
             switch (now.DayOfWeek)
             {
-                case DayOfWeek.Monday when now.TimeOfDay < TimeSpan.FromHours(postHour):
-                case DayOfWeek.Thursday when now.TimeOfDay < TimeSpan.FromHours(postHour):
+                case DayOfWeek.Monday when now.TimeOfDay < postTime:
+                case DayOfWeek.Thursday when now.TimeOfDay < postTime:
                     return nextRun;
                 default:
                 {
