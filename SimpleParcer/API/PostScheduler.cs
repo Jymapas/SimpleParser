@@ -1,5 +1,6 @@
 using SimpleParser.Constants;
 using Telegram.Bot;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
 namespace SimpleParser.API
@@ -13,7 +14,7 @@ namespace SimpleParser.API
             _postReaderFactory = postReaderFactory;
         }
 
-        public async Task SendPostAsync(ITelegramBotClient bot, long channelId)
+        public async Task SendPostAsync(ITelegramBotClient bot, ChatId channelId)
         {
             var postReader = _postReaderFactory(DateTime.Now);
             var postContent = await postReader.GetAnnounceAsync();

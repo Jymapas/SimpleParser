@@ -1,4 +1,4 @@
-using SimpleParser.Constants;
+﻿using SimpleParser.Constants;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -10,6 +10,7 @@ namespace SimpleParser.API
         private readonly MessagesHandler _messagesHandler = new();
         private string _botToken;
         private CancellationToken _cancellationToken;
+        private PostScheduler _postScheduler;
 
         internal async Task Start()
         {
@@ -22,11 +23,16 @@ namespace SimpleParser.API
             }
 
             ITelegramBotClient bot = new TelegramBotClient(_botToken);
+
+            _postScheduler = new PostScheduler(d => new LjPostReader(d));
+
             using CancellationTokenSource cts = new();
             _cancellationToken = cts.Token;
-            
+
             await SetBotCommands(bot);
-            
+
+            _ = StartScheduledTask(bot, Paths.ChannelId);
+
             var receiverOptions = new ReceiverOptions();
 
             bot.StartReceiving(
@@ -61,11 +67,10 @@ namespace SimpleParser.API
                 cancellationToken: _cancellationToken
             );
         }
-        
+
         private async Task StartScheduledTask(ITelegramBotClient bot, ChatId channelId)
         {
             while (true)
-            {
                 try
                 {
                     var now = DateTime.Now;
@@ -84,9 +89,8 @@ namespace SimpleParser.API
                 {
                     Console.WriteLine($"Ошибка при выполнении задачи: {ex.Message}");
                 }
-            }
         }
-        
+
         private DateTime CalculateNextRunTime(DateTime now)
         {
             var nextRun = now.Date.AddHours(12); // Текущее время 12:00
