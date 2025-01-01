@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using SimpleParser.Constants;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
@@ -21,6 +22,7 @@ namespace SimpleParser.API
 
             var botConfig = config.GetSection("BotConfig").Get<BotConfig>();
             _botToken = botConfig.BotToken;
+            var channelId = botConfig.ChannelId;
 
             if (_botToken.Equals(string.Empty))
             {
@@ -37,7 +39,14 @@ namespace SimpleParser.API
 
             await SetBotCommands(bot);
 
-            _ = StartScheduledTask(bot, Paths.ChannelId);
+            if (!channelId.Equals(string.Empty))
+            {
+                _ = StartScheduledTask(bot, channelId);
+            }
+            else
+            {
+                Console.WriteLine(ServiceLines.GetChatIdError);
+            }
 
             var receiverOptions = new ReceiverOptions();
 
