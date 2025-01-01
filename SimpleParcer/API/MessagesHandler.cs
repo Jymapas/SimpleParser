@@ -138,7 +138,7 @@ namespace SimpleParser.API
             await _botClient.SendMessage(
                 id,
                 text,
-                parseMode: ParseMode.Html,
+                ParseMode.Html,
                 linkPreviewOptions: true,
                 cancellationToken: _cancellationToken
             );
