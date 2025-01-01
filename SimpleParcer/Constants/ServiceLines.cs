@@ -7,6 +7,7 @@
         internal const string NoAnnouncementsToday = "There is no new announcements.";
         internal const string UnknownCommand = "Unknown command.";
         internal const string TgTokenError = "There is no TG token.";
+        internal const string GetChatIdError = "Chat id not found.";
         internal const string ArgumentError = "Wrong date format in argument. Use yyyy-MM-dd.";
         internal const string PostWasUpdated = "Пост обновлён ";
     }

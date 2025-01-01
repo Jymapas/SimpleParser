@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using SimpleParser.Constants;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
