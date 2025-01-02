@@ -10,6 +10,7 @@ internal class LjPostReader : IPostReader
     private readonly CultureInfo _culture = new("ru-RU");
     private readonly DateTime _currentDate;
     private readonly HttpClient _httpClient = new();
+    private bool _yearShiftChecked = false;
 
     public LjPostReader(DateTime date)
     {
@@ -65,7 +66,7 @@ internal class LjPostReader : IPostReader
             if (skipCheck
                 || (node.Name.Equals("b", StringComparison.OrdinalIgnoreCase)
                     && DateTime.TryParseExact(
-                        ExtractDate(node.InnerText, _currentDate),
+                        ExtractDate(node.InnerText),
                         Format.Day,
                         _culture,
                         DateTimeStyles.None,
@@ -105,7 +106,7 @@ internal class LjPostReader : IPostReader
         .Replace("<br/>", "\n")
         .Replace("<br />", "\n");
 
-    private static string ExtractDate(string text, DateTime currentDate)
+    private string ExtractDate(string text)
     {
         // Example boldText: "29 сентября (вс)"
         var parts = text.Split('('); // Split at the day of the week.
@@ -114,9 +115,26 @@ internal class LjPostReader : IPostReader
             return null;
         }
 
-        var datePart = string.Concat(parts[0].Trim(), ' ', currentDate.Year); // "29 сентября 2024"
+        // TODO: extract adding year to separate function; Add check year and add year minus 1
+        var datePart = string.Concat(parts[0].Trim(), ' ', _currentDate.Year); // "29 сентября 2024"
 
-        return datePart.ToLower();
+        return AddYear(parts[0].Trim());
+    }
+
+    private string AddYear(string datePart)
+    {
+        if (_yearShiftChecked)
+        {
+            return string.Concat(datePart, ' ', _currentDate.Year);
+        }
+
+        if (datePart.Contains("декаб") && _currentDate.Month == 1)
+        {
+            return string.Concat(datePart, ' ', (_currentDate.Year - 1));
+        }
+
+        _yearShiftChecked = true;
+        return string.Concat(datePart, ' ', _currentDate.Year);
     }
 
     private bool CompareTwoDates(DateTime lineDate, DateTime currentDate)
