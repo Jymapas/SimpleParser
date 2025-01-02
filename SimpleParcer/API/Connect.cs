@@ -95,7 +95,7 @@ namespace SimpleParser.API
                     var nextRun = CalculateNextRunTime(now);
 
                     var delay = nextRun - now;
-                    Console.WriteLine($"Следующее срабатывание: {nextRun} через {delay}");
+                    Console.WriteLine($"Следующее срабатывание: {nextRun}, через {delay}");
 
                     // Ожидание до следующего срабатывания
                     await Task.Delay(delay);

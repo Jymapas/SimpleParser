@@ -4,6 +4,7 @@ using System.Globalization;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using File = System.IO.File;
 
 namespace SimpleParser.API
 {
@@ -94,7 +95,10 @@ namespace SimpleParser.API
 
         public async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
-            Console.WriteLine(JsonConvert.SerializeObject(exception));
+            var errorLog = JsonConvert.SerializeObject(exception);
+            
+            await File.AppendAllTextAsync(Paths.logFilePath, errorLog + Environment.NewLine, cancellationToken);
         }
+
     }
 }
