@@ -50,7 +50,7 @@ namespace SimpleParser.API
             if (isPreviousRequest)
             {
                 announce.Append(ServiceLines.PostWasUpdated);
-                announce.Append(DateTime.Now.ToString("dd.MM.yyyy."));
+                announce.Append(DateTime.Now.ToString(Format.HeadPostDateFormat));
                 announce.AppendLine();
             }
 
