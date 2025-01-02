@@ -34,7 +34,7 @@ namespace SimpleParser.Tests
             var httpClient = new HttpClient(mockHttpMessageHandler.Object);
             var ljPostReader = new LjPostReader(DateTime.Parse(date));
             typeof(LjPostReader)
-                .GetField("httpClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                .GetField("_httpClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                 .SetValue(ljPostReader, httpClient);
 
             // Act
@@ -64,7 +64,7 @@ namespace SimpleParser.Tests
             var httpClient = new HttpClient(mockHttpMessageHandler.Object);
             var ljPostReader = new LjPostReader();
             typeof(LjPostReader)
-                .GetField("httpClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                .GetField("_httpClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                 .SetValue(ljPostReader, httpClient);
 
             // Act
