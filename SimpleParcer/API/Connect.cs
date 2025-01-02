@@ -43,7 +43,7 @@ namespace SimpleParser.API
 
             if (!channelId.Equals(string.Empty))
             {
-                _ = StartScheduledTask(bot, channelId);
+                _ = StartScheduledTask(channelId, messagesSender);
             }
             else
             {
@@ -85,7 +85,7 @@ namespace SimpleParser.API
             );
         }
 
-        private async Task StartScheduledTask(ITelegramBotClient bot, ChatId channelId)
+        private async Task StartScheduledTask(ChatId channelId, MessagesSender messagesSender)
         {
             while (true)
             {
@@ -101,7 +101,7 @@ namespace SimpleParser.API
                     await Task.Delay(delay);
 
                     // Отправка поста
-                    await _postScheduler.SendPost(bot, channelId, _cancellationToken);
+                    await _postScheduler.SendPost(channelId, messagesSender);
                 }
                 catch (OperationCanceledException e)
                 {
@@ -129,13 +129,13 @@ namespace SimpleParser.API
                 {
                     var daysToAdd = now.DayOfWeek switch
                     {
-                        DayOfWeek.Monday => 3, // Следующий четверг
-                        DayOfWeek.Tuesday => 2, // Следующий четверг
+                        DayOfWeek.Monday => 3,    // Следующий четверг
+                        DayOfWeek.Tuesday => 2,   // Следующий четверг
                         DayOfWeek.Wednesday => 1, // Следующий четверг
-                        DayOfWeek.Thursday => 4, // Следующий понедельник
-                        DayOfWeek.Friday => 3, // Следующий понедельник
-                        DayOfWeek.Saturday => 2, // Следующий понедельник
-                        DayOfWeek.Sunday => 1, // Следующий понедельник
+                        DayOfWeek.Thursday => 4,  // Следующий понедельник
+                        DayOfWeek.Friday => 3,    // Следующий понедельник
+                        DayOfWeek.Saturday => 2,  // Следующий понедельник
+                        DayOfWeek.Sunday => 1,    // Следующий понедельник
                         _ => throw new InvalidOperationException("Неверный день недели"),
                     };
                     return nextRun.AddDays(daysToAdd);

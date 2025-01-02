@@ -1,28 +1,19 @@
 using Newtonsoft.Json;
 using SimpleParser.Constants;
 using System.Globalization;
-using System.Text;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
 namespace SimpleParser.API
 {
-    internal class MessagesHandler
+    internal class MessagesHandler(MessagesSender messagesSender)
     {
-        private ITelegramBotClient _botClient;
-        private CancellationToken _cancellationToken;
         private bool _isPreviousRequest;
         private IPostReader _reader;
-        private MessagesSender _messagesSender;
 
-        public MessagesHandler(MessagesSender messagesSender) => _messagesSender = messagesSender;
-        
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            _botClient = botClient;
-            _cancellationToken = cancellationToken;
-
             if (update.Type != UpdateType.Message || update.Message!.Type != MessageType.Text)
             {
                 return;
@@ -46,7 +37,7 @@ namespace SimpleParser.API
             else
             {
                 Console.WriteLine(ServiceLines.UnknownCommand);
-                await _messagesSender.SendTextMessage(chatId, ServiceLines.UnknownCommand);
+                await messagesSender.SendTextMessage(chatId, ServiceLines.UnknownCommand);
             }
         }
 
@@ -63,7 +54,7 @@ namespace SimpleParser.API
                     out var parsedDate))
                 {
                     _isPreviousRequest = true;
-                    await _messagesSender.SendTextMessage(chatId, ServiceLines.ArgumentError);
+                    await messagesSender.SendTextMessage(chatId, ServiceLines.ArgumentError);
                     return;
                 }
 
@@ -75,7 +66,7 @@ namespace SimpleParser.API
             }
 
             var announceSource = await _reader.GetAnnounceAsync();
-            await _messagesSender.SendAnnouncement(chatId, announceSource, _isPreviousRequest);
+            await messagesSender.SendAnnouncement(chatId, announceSource, _isPreviousRequest);
         }
 
         private async Task HandleRecentCommand(ChatId chatId)
@@ -98,7 +89,7 @@ namespace SimpleParser.API
             _reader = new LjPostReader(lastPostDate);
 
             var announceSource = await _reader.GetAnnounceAsync();
-            await _messagesSender.SendAnnouncement(chatId, announceSource);
+            await messagesSender.SendAnnouncement(chatId, announceSource);
         }
 
         public async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)

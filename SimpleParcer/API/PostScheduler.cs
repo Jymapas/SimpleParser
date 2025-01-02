@@ -1,7 +1,6 @@
 using SimpleParser.Constants;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 
 namespace SimpleParser.API
 {
@@ -14,7 +13,7 @@ namespace SimpleParser.API
             _postReaderFactory = postReaderFactory;
         }
 
-        public async Task SendPost(ITelegramBotClient bot, ChatId channelId, CancellationToken cancellationToken)
+        public async Task SendPost(ChatId channelId, MessagesSender messagesSender)
         {
             var postReader = _postReaderFactory(DateTime.Now);
             var postContent = await postReader.GetAnnounceAsync();
@@ -24,14 +23,8 @@ namespace SimpleParser.API
                 Console.WriteLine(postContent);
                 return;
             }
-
-            await bot.SendMessage(
-                channelId,
-                postContent,
-                ParseMode.Html,
-                linkPreviewOptions: true,
-                cancellationToken: cancellationToken
-            );
+            
+            await messagesSender.SendAnnouncement(channelId, postContent);
         }
     }
 }
