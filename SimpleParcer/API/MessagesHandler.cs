@@ -46,7 +46,7 @@ namespace SimpleParser.API
             else
             {
                 Console.WriteLine(ServiceLines.UnknownCommand);
-                await SendTextMessage(chatId, ServiceLines.UnknownCommand);
+                await _messagesSender.SendTextMessage(chatId, ServiceLines.UnknownCommand);
             }
         }
 
@@ -63,7 +63,7 @@ namespace SimpleParser.API
                     out var parsedDate))
                 {
                     _isPreviousRequest = true;
-                    await SendTextMessage(chatId, ServiceLines.ArgumentError);
+                    await _messagesSender.SendTextMessage(chatId, ServiceLines.ArgumentError);
                     return;
                 }
 
@@ -75,7 +75,7 @@ namespace SimpleParser.API
             }
 
             var announceSource = await _reader.GetAnnounceAsync();
-            await SendAnnouncement(chatId, announceSource);
+            await _messagesSender.SendAnnouncement(chatId, announceSource, _isPreviousRequest);
         }
 
         private async Task HandleRecentCommand(ChatId chatId)
@@ -98,53 +98,12 @@ namespace SimpleParser.API
             _reader = new LjPostReader(lastPostDate);
 
             var announceSource = await _reader.GetAnnounceAsync();
-            await SendAnnouncement(chatId, announceSource);
-        }
-
-        private async Task SendAnnouncement(ChatId chatId, string announceSource)
-        {
-            if (announceSource == ServiceLines.ReceivingPostError)
-            {
-                await SendTextMessage(chatId, ServiceLines.ReceivingPostError);
-                return;
-            }
-
-            var announce = new StringBuilder();
-            announce.Append(ServiceLines.TgHead);
-            announce.AppendLine();
-
-            if (_isPreviousRequest)
-            {
-                announce.Append(ServiceLines.PostWasUpdated);
-                announce.Append(DateTime.Now.ToString("dd.MM.yyyy."));
-                announce.AppendLine();
-            }
-
-            announce.AppendLine();
-            announce.AppendLine(announceSource);
-
-            await SendTextMessage(chatId, announce.ToString());
+            await _messagesSender.SendAnnouncement(chatId, announceSource);
         }
 
         public async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
             Console.WriteLine(JsonConvert.SerializeObject(exception));
-        }
-
-        /// <summary>
-        ///     Отправка сообщений ботом
-        /// </summary>
-        /// <param name="id">Id пользователя, чата или канала, куда будет отправлено сообщение</param>
-        /// <param name="text">Текст сообщения в HTML формате</param>
-        private async Task SendTextMessage(ChatId id, string text)
-        {
-            await _botClient.SendMessage(
-                id,
-                text,
-                ParseMode.Html,
-                linkPreviewOptions: true,
-                cancellationToken: _cancellationToken
-            );
         }
     }
 }
