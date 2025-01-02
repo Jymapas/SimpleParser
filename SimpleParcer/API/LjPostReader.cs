@@ -122,7 +122,7 @@ internal class LjPostReader : IPostReader
 
     private static string AddYear(string datePart, DateTime currentDate)
     {
-        int yearToAdd = currentDate.Year;
+        var yearToAdd = currentDate.Year;
 
         if (datePart.Contains("декаб") && currentDate.Month == 1)
         {

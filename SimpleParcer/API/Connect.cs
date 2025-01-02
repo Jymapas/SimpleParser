@@ -86,6 +86,7 @@ namespace SimpleParser.API
         private async Task StartScheduledTask(ITelegramBotClient bot, ChatId channelId)
         {
             while (true)
+            {
                 try
                 {
                     var now = DateTime.Now;
@@ -109,6 +110,7 @@ namespace SimpleParser.API
                 {
                     Console.WriteLine($"Ошибка при выполнении задачи: {e.Message}");
                 }
+            }
         }
 
         private DateTime CalculateNextRunTime(DateTime now)
