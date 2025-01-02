@@ -1,25 +1,20 @@
 using Newtonsoft.Json;
 using SimpleParser.Constants;
 using System.Globalization;
-using System.Text;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using File = System.IO.File;
 
 namespace SimpleParser.API
 {
-    internal class MessagesHandler
+    internal class MessagesHandler(MessagesSender messagesSender)
     {
-        private ITelegramBotClient _botClient;
-        private CancellationToken _cancellationToken;
         private bool _isPreviousRequest;
         private IPostReader _reader;
 
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            _botClient = botClient;
-            _cancellationToken = cancellationToken;
-
             if (update.Type != UpdateType.Message || update.Message!.Type != MessageType.Text)
             {
                 return;
@@ -43,7 +38,7 @@ namespace SimpleParser.API
             else
             {
                 Console.WriteLine(ServiceLines.UnknownCommand);
-                await SendTextMessage(chatId, ServiceLines.UnknownCommand);
+                await messagesSender.SendTextMessage(chatId, ServiceLines.UnknownCommand);
             }
         }
 
@@ -60,7 +55,7 @@ namespace SimpleParser.API
                     out var parsedDate))
                 {
                     _isPreviousRequest = true;
-                    await SendTextMessage(chatId, ServiceLines.ArgumentError);
+                    await messagesSender.SendTextMessage(chatId, ServiceLines.ArgumentError);
                     return;
                 }
 
@@ -72,7 +67,7 @@ namespace SimpleParser.API
             }
 
             var announceSource = await _reader.GetAnnounceAsync();
-            await SendAnnouncement(chatId, announceSource);
+            await messagesSender.SendAnnouncement(chatId, announceSource, _isPreviousRequest);
         }
 
         private async Task HandleRecentCommand(ChatId chatId)
@@ -95,53 +90,15 @@ namespace SimpleParser.API
             _reader = new LjPostReader(lastPostDate);
 
             var announceSource = await _reader.GetAnnounceAsync();
-            await SendAnnouncement(chatId, announceSource);
-        }
-
-        private async Task SendAnnouncement(ChatId chatId, string announceSource)
-        {
-            if (announceSource == ServiceLines.ReceivingPostError)
-            {
-                await SendTextMessage(chatId, ServiceLines.ReceivingPostError);
-                return;
-            }
-
-            var announce = new StringBuilder();
-            announce.Append(ServiceLines.TgHead);
-            announce.AppendLine();
-
-            if (_isPreviousRequest)
-            {
-                announce.Append(ServiceLines.PostWasUpdated);
-                announce.Append(DateTime.Now.ToString("dd.MM.yyyy."));
-                announce.AppendLine();
-            }
-
-            announce.AppendLine();
-            announce.AppendLine(announceSource);
-
-            await SendTextMessage(chatId, announce.ToString());
+            await messagesSender.SendAnnouncement(chatId, announceSource);
         }
 
         public async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
-            Console.WriteLine(JsonConvert.SerializeObject(exception));
+            var errorLog = JsonConvert.SerializeObject(exception);
+            
+            await File.AppendAllTextAsync(Paths.logFilePath, errorLog + Environment.NewLine, cancellationToken);
         }
 
-        /// <summary>
-        ///     Отправка сообщений ботом
-        /// </summary>
-        /// <param name="id">Id пользователя, чата или канала, куда будет отправлено сообщение</param>
-        /// <param name="text">Текст сообщения в HTML формате</param>
-        private async Task SendTextMessage(ChatId id, string text)
-        {
-            await _botClient.SendMessage(
-                id,
-                text,
-                ParseMode.Html,
-                linkPreviewOptions: true,
-                cancellationToken: _cancellationToken
-            );
-        }
     }
 }
