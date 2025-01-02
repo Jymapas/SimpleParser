@@ -114,10 +114,24 @@ internal class LjPostReader : IPostReader
             return null;
         }
 
+        // TODO: extract adding year to separate function; Add check year and add year minus 1
         var datePart = string.Concat(parts[0].Trim(), ' ', currentDate.Year); // "29 сентября 2024"
 
-        return datePart.ToLower();
+        return AddYear(parts[0].Trim(), currentDate);
     }
+
+    private static string AddYear(string datePart, DateTime currentDate)
+    {
+        int yearToAdd = currentDate.Year;
+
+        if (datePart.Contains("декаб") && currentDate.Month == 1)
+        {
+            yearToAdd--;
+        }
+
+        return $"{datePart} {yearToAdd}";
+    }
+
 
     private bool CompareTwoDates(DateTime lineDate, DateTime currentDate)
     {

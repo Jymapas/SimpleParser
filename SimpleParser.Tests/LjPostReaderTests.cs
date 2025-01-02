@@ -34,7 +34,7 @@ namespace SimpleParser.Tests
             var httpClient = new HttpClient(mockHttpMessageHandler.Object);
             var ljPostReader = new LjPostReader(DateTime.Parse(date));
             typeof(LjPostReader)
-                .GetField("httpClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                .GetField("_httpClient", BindingFlags.NonPublic | BindingFlags.Instance)
                 .SetValue(ljPostReader, httpClient);
 
             // Act
@@ -42,6 +42,43 @@ namespace SimpleParser.Tests
 
             // Assert
             Assert.Contains(response, result);
+        }
+
+        [Fact]
+        public async Task GetAnnounceAsync_ReturnsFormattedAnnouncement_AfterYearShift()
+        {
+            // Arrange
+            var html =
+                """<article class=" b-singlepost-body entry-content e-content  " lj-sale-entry lj-discovery-tags lj-embed-resizer ><p>Копия поста выкладывается в <a href="https://www.livejournal.com/away?to=https%3A%2F%2Ft.me%2FWeekChgkSPB" rel="nofollow" rel="nofollow">Телеграм-канал</a>.<br /><br /><b>30 декабря (пн)</b><br /><a href="https://chgk-spb.livejournal.com/3208005.html">Кубок Курта Кобейна-3 - Coffee Land (13:00) 1650 р.</a><br /><a href="https://chgk-spb.livejournal.com/3208285.html">Ночь согревающего очага-2024 - Coffee Land (16:00) 1800 р.</a><br /><br /><b>03 января (пт)</b><br /><a href="https://chgk-spb.livejournal.com/3208998.html">Болтик в гаечку-3 - Coffee Land (13:00) 1800 р.</a><br /><a href="https://chgk-spb.livejournal.com/3211289.html">Кубок Оливье - Queens (15:30) 1650 р.</a><br /></article>""";
+            var date = "2025-01-02";
+            var response = "Болтик в гаечку-3";
+            var notContains = "Кубок Курта Кобейна-3";
+            var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+
+            mockHttpMessageHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = System.Net.HttpStatusCode.OK,
+                    Content = new StringContent(html),
+                });
+
+            var httpClient = new HttpClient(mockHttpMessageHandler.Object);
+            var ljPostReader = new LjPostReader(DateTime.Parse(date));
+            typeof(LjPostReader)
+                .GetField("_httpClient", BindingFlags.NonPublic | BindingFlags.Instance)
+                .SetValue(ljPostReader, httpClient);
+
+            // Act
+            var result = await ljPostReader.GetAnnounceAsync();
+
+            // Assert
+            Assert.Contains(response, result);
+            Assert.DoesNotContain(notContains, result);
         }
 
         [Fact]
@@ -64,7 +101,7 @@ namespace SimpleParser.Tests
             var httpClient = new HttpClient(mockHttpMessageHandler.Object);
             var ljPostReader = new LjPostReader();
             typeof(LjPostReader)
-                .GetField("httpClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                .GetField("_httpClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                 .SetValue(ljPostReader, httpClient);
 
             // Act
