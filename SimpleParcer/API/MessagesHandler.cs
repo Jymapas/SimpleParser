@@ -14,7 +14,10 @@ namespace SimpleParser.API
         private CancellationToken _cancellationToken;
         private bool _isPreviousRequest;
         private IPostReader _reader;
+        private MessagesSender _messagesSender;
 
+        public MessagesHandler(MessagesSender messagesSender) => _messagesSender = messagesSender;
+        
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             _botClient = botClient;

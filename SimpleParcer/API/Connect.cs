@@ -8,7 +8,6 @@ namespace SimpleParser.API
 {
     internal class Connect
     {
-        private readonly MessagesHandler _messagesHandler = new();
         private string _botToken;
         private CancellationToken _cancellationToken;
         private PostScheduler _postScheduler;
@@ -37,6 +36,9 @@ namespace SimpleParser.API
             using CancellationTokenSource cts = new();
             _cancellationToken = cts.Token;
 
+            var messagesSender = new MessagesSender(new TelegramBotClient(_botToken), _cancellationToken);
+            var messagesHandler = new MessagesHandler(messagesSender);
+            
             await SetBotCommands(bot);
 
             if (!channelId.Equals(string.Empty))
@@ -51,8 +53,8 @@ namespace SimpleParser.API
             var receiverOptions = new ReceiverOptions();
 
             bot.StartReceiving(
-                _messagesHandler.HandleUpdateAsync,
-                _messagesHandler.HandleErrorAsync,
+                messagesHandler.HandleUpdateAsync,
+                messagesHandler.HandleErrorAsync,
                 receiverOptions,
                 _cancellationToken
             );
